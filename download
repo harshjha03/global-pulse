@@ -1,0 +1,486 @@
+import { useState } from 'react';
+import { ChevronDown } from 'lucide-react';
+import ConsumptionCalendar from '../components/ConsumptionCalendar';
+
+const CategoryIntel = ({ currency, currencyRates }) => {
+  const [selectedCategory, setSelectedCategory] = useState('Health & Wellness');
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+
+  const categories = [
+    'Food & Beverages',
+    'Personal Care',
+    'Health & Wellness',
+    'Home Care',
+    'Baby Care',
+    'Pet Care'
+  ];
+
+  const convertCurrency = (value) => {
+    const rate = currencyRates[currency]?.rate || 1;
+    const symbol = currencyRates[currency]?.symbol || '₹';
+    const converted = value * rate;
+    return `${symbol}${converted.toFixed(converted < 10 ? 1 : 0)}`;
+  };
+
+  return (
+    <div className="p-5">
+      {/* Header with Category Selector */}
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold" style={{ color: '#111827' }}>
+            Category Intelligence
+          </h1>
+          <p className="text-sm mt-1" style={{ color: '#6B7280' }}>
+            Comprehensive market insights for {selectedCategory}
+          </p>
+        </div>
+
+        <div className="relative">
+          <button
+            data-testid="category-selector"
+            onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg"
+            style={{
+              background: 'white',
+              border: '1px solid #E5E7EB',
+              fontSize: '11px',
+              fontWeight: 600,
+              color: '#111827',
+              cursor: 'pointer'
+            }}
+          >
+            {selectedCategory}
+            <ChevronDown size={14} />
+          </button>
+
+          {showCategoryDropdown && (
+            <div
+              className="absolute right-0 mt-2 rounded-lg overflow-hidden"
+              style={{
+                background: 'white',
+                border: '1px solid #E5E7EB',
+                boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
+                minWidth: '180px',
+                zIndex: 10
+              }}
+            >
+              {categories.map(cat => (
+                <div
+                  key={cat}
+                  data-testid={`category-option-${cat.toLowerCase().replace(/\s+/g, '-')}`}
+                  onClick={() => {
+                    setSelectedCategory(cat);
+                    setShowCategoryDropdown(false);
+                  }}
+                  className="px-4 py-2 cursor-pointer"
+                  style={{
+                    fontSize: '11px',
+                    color: selectedCategory === cat ? '#007BFF' : '#374151',
+                    background: selectedCategory === cat ? 'rgba(0,123,255,0.07)' : 'white',
+                    fontWeight: selectedCategory === cat ? 600 : 400
+                  }}
+                  onMouseEnter={(e) => {
+                    if (selectedCategory !== cat) e.currentTarget.style.background = '#F8FAFF';
+                  }}
+                  onMouseLeave={(e) => {
+                    if (selectedCategory !== cat) e.currentTarget.style.background = 'white';
+                  }}
+                >
+                  {cat}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* All Content in Single Scrollable Page */}
+      <div className="space-y-6">
+        {/* Section 1: User Trends */}
+        <Section title="User Trends" subtitle="Consumer behavior and emerging patterns">
+          <UserTrendsContent currency={currency} convertCurrency={convertCurrency} />
+        </Section>
+
+        {/* Section 2: Demographics */}
+        <Section title="Demographics" subtitle="Target audience breakdown">
+          <DemographicsContent currency={currency} convertCurrency={convertCurrency} />
+        </Section>
+
+        {/* Section 3: Margins & Performance */}
+        <Section title="Margins & Performance" subtitle="Financial metrics and benchmarks">
+          <MarginsContent currency={currency} convertCurrency={convertCurrency} />
+        </Section>
+
+        {/* Section 4: TAM Analysis */}
+        <Section title="TAM Analysis" subtitle="Total addressable market insights">
+          <TAMContent currency={currency} convertCurrency={convertCurrency} />
+        </Section>
+
+        {/* Section 5: Consumption Patterns */}
+        <Section title="Consumption Patterns" subtitle="Seasonal trends and buying behavior">
+          <ConsumptionContent />
+        </Section>
+      </div>
+    </div>
+  );
+};
+
+// Section wrapper component
+const Section = ({ title, subtitle, children }) => (
+  <div
+    className="rounded-lg"
+    style={{
+      background: 'white',
+      border: '1px solid #E5E7EB',
+      boxShadow: '0 2px 12px rgba(0,0,0,0.07)',
+      padding: '18px 20px'
+    }}
+  >
+    <div className="mb-4">
+      <h2 className="font-bold" style={{ fontSize: '14px', color: '#111827' }}>
+        {title}
+      </h2>
+      <p style={{ fontSize: '10px', color: '#6B7280', marginTop: '2px' }}>
+        {subtitle}
+      </p>
+    </div>
+    {children}
+  </div>
+);
+
+// User Trends Content
+const UserTrendsContent = ({ currency, convertCurrency }) => {
+  const kpiData = [
+    { label: 'Consumer Interest Velocity (1mo)', value: '+34.2%', color: '#28A745' },
+    { label: 'Consumer Interest Velocity (3mo)', value: '+28.8%', color: '#28A745' },
+    { label: 'New SKU Launches', value: '248', color: '#007BFF' },
+    { label: 'VC Inflow', value: convertCurrency(1240), color: '#007BFF' }
+  ];
+
+  const trendsData = [
+    { trend: 'Functional beverages', momentum: 94, delta1mo: '+34%', delta3mo: '+28%', delta12mo: '+62%', driver: 'Energy + immunity', stage: 'Growth' },
+    { trend: 'Plant-based proteins', momentum: 88, delta1mo: '+22%', delta3mo: '+18%', delta12mo: '+44%', driver: 'Sustainability', stage: 'Growth' },
+    { trend: 'Probiotic foods', momentum: 82, delta1mo: '+18%', delta3mo: '+24%', delta12mo: '+52%', driver: 'Gut health', stage: 'Mature' },
+    { trend: 'Clean label snacks', momentum: 76, delta1mo: '+12%', delta3mo: '+14%', delta12mo: '+38%', driver: 'Transparency', stage: 'Growth' },
+    { trend: 'Adaptogen supplements', momentum: 68, delta1mo: '+8%', delta3mo: '+12%', delta12mo: '+28%', driver: 'Stress relief', stage: 'Emerging' }
+  ];
+
+  return (
+    <div className="space-y-3">
+      {/* KPI Tiles */}
+      <div className="grid grid-cols-4 gap-2">
+        {kpiData.map((kpi, idx) => (
+          <div
+            key={idx}
+            className="p-3 rounded-lg"
+            style={{
+              background: '#F8FAFF',
+              border: '1px solid #E5E7EB'
+            }}
+          >
+            <div style={{ fontSize: '9px', color: '#6B7280', marginBottom: '4px' }}>
+              {kpi.label}
+            </div>
+            <div className="font-bold" style={{ fontSize: '17px', color: kpi.color }}>
+              {kpi.value}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Rising Trends Table */}
+      <div className="overflow-x-auto">
+        <table style={{ width: '100%', tableLayout: 'fixed', fontSize: '10.5px', lineHeight: '1.3' }}>
+          <thead>
+            <tr style={{ background: '#F8FAFF' }}>
+              <th style={{ padding: '5px 8px', textAlign: 'left', fontSize: '8.5px', fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Trend</th>
+              <th style={{ padding: '5px 8px', textAlign: 'left', fontSize: '8.5px', fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Momentum</th>
+              <th style={{ padding: '5px 8px', textAlign: 'center', fontSize: '8.5px', fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em' }}>1mo Δ</th>
+              <th style={{ padding: '5px 8px', textAlign: 'center', fontSize: '8.5px', fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em' }}>3mo Δ</th>
+              <th style={{ padding: '5px 8px', textAlign: 'center', fontSize: '8.5px', fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em' }}>12mo Δ</th>
+              <th style={{ padding: '5px 8px', textAlign: 'left', fontSize: '8.5px', fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Driver</th>
+              <th style={{ padding: '5px 8px', textAlign: 'left', fontSize: '8.5px', fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Stage</th>
+            </tr>
+          </thead>
+          <tbody>
+            {trendsData.map((row, idx) => (
+              <tr
+                key={idx}
+                style={{ borderTop: '1px solid #E5E7EB', cursor: 'pointer' }}
+                onMouseEnter={(e) => e.currentTarget.style.background = '#F8FAFF'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
+              >
+                <td style={{ padding: '5px 8px', color: '#111827', fontWeight: 600, whiteSpace: 'nowrap' }}>{row.trend}</td>
+                <td style={{ padding: '5px 8px' }}>
+                  <span style={{ color: row.momentum >= 80 ? '#28A745' : row.momentum >= 70 ? '#FFC107' : '#DC3545', fontWeight: 700 }}>
+                    {row.momentum}
+                  </span>
+                </td>
+                <td style={{ padding: '5px 8px', textAlign: 'center', color: '#28A745', fontWeight: 600 }}>{row.delta1mo}</td>
+                <td style={{ padding: '5px 8px', textAlign: 'center', color: '#28A745', fontWeight: 600 }}>{row.delta3mo}</td>
+                <td style={{ padding: '5px 8px', textAlign: 'center', color: '#28A745', fontWeight: 600 }}>{row.delta12mo}</td>
+                <td style={{ padding: '5px 8px', color: '#374151' }}>{row.driver}</td>
+                <td style={{ padding: '5px 8px' }}>
+                  <span
+                    className="px-2 py-0.5 rounded-full"
+                    style={{
+                      fontSize: '8px',
+                      fontWeight: 700,
+                      background: row.stage === 'Growth' ? '#DCFCE7' : row.stage === 'Mature' ? '#FEF9C3' : '#E0F2FE',
+                      color: row.stage === 'Growth' ? '#166534' : row.stage === 'Mature' ? '#854D0E' : '#0369A1'
+                    }}
+                  >
+                    {row.stage}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
+// Demographics Content
+const DemographicsContent = ({ currency, convertCurrency }) => {
+  const kpiData = [
+    { label: 'Primary Age Band', value: '25-44' },
+    { label: 'Urban Buyers', value: '68%' },
+    { label: 'Female Skew', value: '58%' },
+    { label: 'Avg HH Income', value: convertCurrency(1240) }
+  ];
+
+  const segmentData = [
+    { segment: 'Health-conscious millennials', age: '28-38', income: convertCurrency(1400), freq: '4.2', channel: 'Online + premium stores', aov: convertCurrency(680), driver: 'Wellness', growth: '+12.8%' },
+    { segment: 'Fitness enthusiasts', age: '22-35', income: convertCurrency(980), freq: '6.8', channel: 'D2C + gyms', aov: convertCurrency(840), driver: 'Performance', growth: '+18.4%' },
+    { segment: 'Preventive care seekers', age: '45-60', income: convertCurrency(1620), freq: '3.4', channel: 'Pharmacy + clinics', aov: convertCurrency(1120), driver: 'Longevity', growth: '+8.2%' },
+    { segment: 'Parents (child health)', age: '30-42', income: convertCurrency(1180), freq: '5.2', channel: 'Pediatric stores', aov: convertCurrency(560), driver: 'Child immunity', growth: '+14.6%' }
+  ];
+
+  return (
+    <div className="space-y-3">
+      {/* KPI Tiles */}
+      <div className="grid grid-cols-4 gap-2">
+        {kpiData.map((kpi, idx) => (
+          <div
+            key={idx}
+            className="p-3 rounded-lg"
+            style={{
+              background: '#F8FAFF',
+              border: '1px solid #E5E7EB'
+            }}
+          >
+            <div style={{ fontSize: '9px', color: '#6B7280', marginBottom: '4px' }}>
+              {kpi.label}
+            </div>
+            <div className="font-bold" style={{ fontSize: '17px', color: '#111827' }}>
+              {kpi.value}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Buyer Segment Table */}
+      <div className="overflow-x-auto">
+        <table style={{ width: '100%', tableLayout: 'fixed', fontSize: '10.5px', lineHeight: '1.3' }}>
+          <thead>
+            <tr style={{ background: '#F8FAFF' }}>
+              <th style={{ padding: '5px 8px', textAlign: 'left', fontSize: '8.5px', fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Segment</th>
+              <th style={{ padding: '5px 8px', textAlign: 'left', fontSize: '8.5px', fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Age</th>
+              <th style={{ padding: '5px 8px', textAlign: 'left', fontSize: '8.5px', fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Income</th>
+              <th style={{ padding: '5px 8px', textAlign: 'left', fontSize: '8.5px', fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Freq/mo</th>
+              <th style={{ padding: '5px 8px', textAlign: 'left', fontSize: '8.5px', fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Channel</th>
+              <th style={{ padding: '5px 8px', textAlign: 'left', fontSize: '8.5px', fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em' }}>AOV</th>
+              <th style={{ padding: '5px 8px', textAlign: 'left', fontSize: '8.5px', fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Driver</th>
+              <th style={{ padding: '5px 8px', textAlign: 'left', fontSize: '8.5px', fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em' }}>YoY</th>
+            </tr>
+          </thead>
+          <tbody>
+            {segmentData.map((row, idx) => (
+              <tr
+                key={idx}
+                style={{ borderTop: '1px solid #E5E7EB', cursor: 'pointer' }}
+                onMouseEnter={(e) => e.currentTarget.style.background = '#F8FAFF'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
+              >
+                <td style={{ padding: '5px 8px', color: '#111827', fontWeight: 600 }}>{row.segment}</td>
+                <td style={{ padding: '5px 8px', color: '#374151' }}>{row.age}</td>
+                <td style={{ padding: '5px 8px', color: '#374151' }}>{row.income}</td>
+                <td style={{ padding: '5px 8px', color: '#374151' }}>{row.freq}</td>
+                <td style={{ padding: '5px 8px', color: '#374151', fontSize: '9.5px' }}>{row.channel}</td>
+                <td style={{ padding: '5px 8px', color: '#007BFF', fontWeight: 600 }}>{row.aov}</td>
+                <td style={{ padding: '5px 8px', color: '#374151' }}>{row.driver}</td>
+                <td style={{ padding: '5px 8px', color: '#28A745', fontWeight: 600 }}>{row.growth}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
+// Margins Content
+const MarginsContent = ({ currency, convertCurrency }) => {
+  const marginData = [
+    { metric: 'Gross margin', value: '54-72%', unit: '%', cpgixAvg: '42%', healthy: '>50%', atRisk: '<35%', status: 'Healthy' },
+    { metric: 'Net margin', value: '11-18%', unit: '%', cpgixAvg: '9%', healthy: '>12%', atRisk: '<6%', status: 'Healthy' },
+    { metric: 'Breakeven', value: '24 mo', unit: 'months', cpgixAvg: '28 mo', healthy: '<24 mo', atRisk: '>36 mo', status: 'Healthy' },
+    { metric: 'AOV', value: convertCurrency(640), unit: currency, cpgixAvg: convertCurrency(420), healthy: `>${convertCurrency(500)}`, atRisk: `<${convertCurrency(200)}`, status: 'Healthy' },
+    { metric: 'CAC:LTV', value: '1:3.4', unit: 'ratio', cpgixAvg: '1:3.8', healthy: '>1:4', atRisk: '<1:2', status: 'At Risk' },
+    { metric: 'Inventory turn', value: '44d', unit: 'days', cpgixAvg: '38d', healthy: '<45d', atRisk: '>60d', status: 'Healthy' },
+    { metric: 'Beta (β)', value: '1.41', unit: 'volatility', cpgixAvg: '1.08', healthy: '0.8-1.2', atRisk: '>1.5', status: 'Watch' },
+    { metric: 'HHI', value: '1,380', unit: 'index', cpgixAvg: '2,240', healthy: '<1,500', atRisk: '>3,000', status: 'Healthy' },
+    { metric: 'SKU survival', value: '12%', unit: '%', cpgixAvg: '18%', healthy: '>20%', atRisk: '<10%', status: 'At Risk' }
+  ];
+
+  return (
+    <div className="overflow-x-auto">
+      <table style={{ width: '100%', tableLayout: 'fixed', fontSize: '10.5px', lineHeight: '1.3' }}>
+        <thead>
+          <tr style={{ background: '#F8FAFF' }}>
+            <th style={{ padding: '5px 8px', textAlign: 'left', fontSize: '8.5px', fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Metric</th>
+            <th style={{ padding: '5px 8px', textAlign: 'left', fontSize: '8.5px', fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em' }}>This Category</th>
+            <th style={{ padding: '5px 8px', textAlign: 'left', fontSize: '8.5px', fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Unit</th>
+            <th style={{ padding: '5px 8px', textAlign: 'left', fontSize: '8.5px', fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em' }}>CPG-IX Avg</th>
+            <th style={{ padding: '5px 8px', textAlign: 'left', fontSize: '8.5px', fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Healthy</th>
+            <th style={{ padding: '5px 8px', textAlign: 'left', fontSize: '8.5px', fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em' }}>At Risk</th>
+            <th style={{ padding: '5px 8px', textAlign: 'left', fontSize: '8.5px', fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {marginData.map((row, idx) => (
+            <tr
+              key={idx}
+              style={{ borderTop: '1px solid #E5E7EB', cursor: 'pointer' }}
+              onMouseEnter={(e) => e.currentTarget.style.background = '#F8FAFF'}
+              onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
+            >
+              <td style={{ padding: '5px 8px', color: '#111827', fontWeight: 600 }}>{row.metric}</td>
+              <td style={{ padding: '5px 8px', color: row.status === 'Healthy' ? '#28A745' : row.status === 'Watch' ? '#FFC107' : '#DC3545', fontWeight: 700 }}>{row.value}</td>
+              <td style={{ padding: '5px 8px', color: '#6B7280', fontSize: '9px' }}>{row.unit}</td>
+              <td style={{ padding: '5px 8px', color: '#374151' }}>{row.cpgixAvg}</td>
+              <td style={{ padding: '5px 8px', color: '#28A745' }}>{row.healthy}</td>
+              <td style={{ padding: '5px 8px', color: '#DC3545' }}>{row.atRisk}</td>
+              <td style={{ padding: '5px 8px' }}>
+                <span
+                  className="px-2 py-0.5 rounded-full"
+                  style={{
+                    fontSize: '8px',
+                    fontWeight: 700,
+                    background: row.status === 'Healthy' ? '#DCFCE7' : row.status === 'Watch' ? '#FEF9C3' : '#FEE2E2',
+                    color: row.status === 'Healthy' ? '#166534' : row.status === 'Watch' ? '#854D0E' : '#991B1B'
+                  }}
+                >
+                  {row.status}
+                </span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
+// TAM Content
+const TAMContent = ({ currency, convertCurrency }) => {
+  const kpiData = [
+    { label: 'Global TAM', value: convertCurrency(900000) },
+    { label: 'India TAM', value: convertCurrency(1100) },
+    { label: '3yr CAGR', value: '+14.6%' },
+    { label: 'Market Concentration', value: 'HHI 1,380' }
+  ];
+
+  const regionalData = [
+    { region: 'South Asia', tam: convertCurrency(1100), cagr: '+12.8%', hhi: '1,380', cr3: '42%', pl: '8%', stage: 'Growth' },
+    { region: 'SEA', tam: convertCurrency(280), cagr: '+18.2%', hhi: '2,120', cr3: '58%', pl: '12%', stage: 'Emerging' },
+    { region: 'Europe', tam: convertCurrency(340), cagr: '+6.4%', hhi: '1,840', cr3: '48%', pl: '18%', stage: 'Mature' },
+    { region: 'USA', tam: convertCurrency(420), cagr: '+8.8%', hhi: '1,620', cr3: '44%', pl: '14%', stage: 'Mature' },
+    { region: 'Middle East', tam: convertCurrency(180), cagr: '+11.2%', hhi: '2,480', cr3: '64%', pl: '6%', stage: 'Growth' },
+    { region: 'East Asia', tam: convertCurrency(380), cagr: '+9.4%', hhi: '1,720', cr3: '52%', pl: '10%', stage: 'Growth' },
+    { region: 'Latin America', tam: convertCurrency(160), cagr: '+10.8%', hhi: '2,240', cr3: '56%', pl: '8%', stage: 'Emerging' },
+    { region: 'Africa', tam: convertCurrency(120), cagr: '+16.4%', hhi: '2,680', cr3: '72%', pl: '4%', stage: 'Emerging' },
+    { region: 'Oceania', tam: convertCurrency(48), cagr: '+4.2%', hhi: '1,880', cr3: '46%', pl: '16%', stage: 'Mature' }
+  ];
+
+  return (
+    <div className="space-y-3">
+      {/* KPI Tiles */}
+      <div className="grid grid-cols-4 gap-2">
+        {kpiData.map((kpi, idx) => (
+          <div
+            key={idx}
+            className="p-3 rounded-lg"
+            style={{
+              background: '#F8FAFF',
+              border: '1px solid #E5E7EB'
+            }}
+          >
+            <div style={{ fontSize: '9px', color: '#6B7280', marginBottom: '4px' }}>
+              {kpi.label}
+            </div>
+            <div className="font-bold" style={{ fontSize: '17px', color: '#111827' }}>
+              {kpi.value}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Regional Breakdown Table */}
+      <div className="overflow-x-auto">
+        <table style={{ width: '100%', tableLayout: 'fixed', fontSize: '10.5px', lineHeight: '1.3' }}>
+          <thead>
+            <tr style={{ background: '#F8FAFF' }}>
+              <th style={{ padding: '5px 8px', textAlign: 'left', fontSize: '8.5px', fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Region</th>
+              <th style={{ padding: '5px 8px', textAlign: 'left', fontSize: '8.5px', fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em' }}>TAM</th>
+              <th style={{ padding: '5px 8px', textAlign: 'left', fontSize: '8.5px', fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em' }}>3yr CAGR</th>
+              <th style={{ padding: '5px 8px', textAlign: 'left', fontSize: '8.5px', fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em' }}>HHI</th>
+              <th style={{ padding: '5px 8px', textAlign: 'left', fontSize: '8.5px', fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em' }}>CR3</th>
+              <th style={{ padding: '5px 8px', textAlign: 'left', fontSize: '8.5px', fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Priv. Label %</th>
+              <th style={{ padding: '5px 8px', textAlign: 'left', fontSize: '8.5px', fontWeight: 700, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Stage</th>
+            </tr>
+          </thead>
+          <tbody>
+            {regionalData.map((row, idx) => (
+              <tr
+                key={idx}
+                style={{ borderTop: '1px solid #E5E7EB', cursor: 'pointer' }}
+                onMouseEnter={(e) => e.currentTarget.style.background = '#F8FAFF'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
+              >
+                <td style={{ padding: '5px 8px', color: '#111827', fontWeight: 600 }}>{row.region}</td>
+                <td style={{ padding: '5px 8px', color: '#007BFF', fontWeight: 600 }}>{row.tam}</td>
+                <td style={{ padding: '5px 8px', color: '#28A745', fontWeight: 600 }}>{row.cagr}</td>
+                <td style={{ padding: '5px 8px', color: '#374151' }}>{row.hhi}</td>
+                <td style={{ padding: '5px 8px', color: '#374151' }}>{row.cr3}</td>
+                <td style={{ padding: '5px 8px', color: '#374151' }}>{row.pl}</td>
+                <td style={{ padding: '5px 8px' }}>
+                  <span
+                    className="px-2 py-0.5 rounded-full"
+                    style={{
+                      fontSize: '8px',
+                      fontWeight: 700,
+                      background: row.stage === 'Growth' ? '#DCFCE7' : row.stage === 'Mature' ? '#FEF9C3' : '#E0F2FE',
+                      color: row.stage === 'Growth' ? '#166534' : row.stage === 'Mature' ? '#854D0E' : '#0369A1'
+                    }}
+                  >
+                    {row.stage}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
+// Consumption Content
+const ConsumptionContent = () => {
+  return <ConsumptionCalendar />;
+};
+
+export default CategoryIntel;
